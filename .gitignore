@@ -20,3 +20,9 @@ demos/graphs
 .vscode/
 demos/Manifest*
 *.dSYM/
+<<<<<<< HEAD
+=======
+.idea/
+demos/sssp
+demos/sssp.o
+>>>>>>> af5da79 (first draft of sssp with finch ready)

@@ -45,7 +45,7 @@ end");
         ));
 
     finch_call(pq_init, finch_Cint(source), finch_Cint(P), priorityQ);
-    finch_exec("println(%s)", priorityQ);
+    // finch_exec("println(%s)", priorityQ);
     return priorityQ;
 }
 
@@ -61,7 +61,7 @@ end");
         finch_ElementLevel(finch_Cint(0), val))
     );
     finch_call(dist_init, finch_Cint(source), finch_Cint(P), dist);
-    finch_exec("println(%s)", dist);
+    // finch_exec("println(%s)", dist);
     return dist;
 }
 
@@ -103,8 +103,8 @@ end");
         finch_ElementLevel(finch_Cint(0), val))
     );
     finch_call(new_dist_func, finch_Cint(priority), finch_Cint(N), finch_Cint(P), new_dist, edges, old_data->priorityQ, weights, old_data->dist);
-    printf("New dist: \n");
-    finch_exec("println(%s)", new_dist);
+    // printf("New dist: \n");
+    // finch_exec("println(%s)", new_dist);
 
     jl_function_t* new_pq_func = finch_eval("function new_pq_func(new_priorityQ, old_priorityQ, dist, new_dist, priority)\n\
     @index @loop j k new_priorityQ[j, k] = (dist[k] > new_dist[k]) * (new_dist[k] == j-1) + (dist[k] == new_dist[k] && j != $priority) * old_priorityQ[j, k]\n\
@@ -115,8 +115,8 @@ end");
         finch_Solid(finch_Cint(N), finch_ElementLevel(finch_Cint(0), val_pq))
         ));
     finch_call(new_pq_func, new_priorityQ, old_data->priorityQ, old_data->dist, new_dist, finch_Cint(priority));
-    printf("New pQ: \n");
-    finch_exec("println(%s)", new_priorityQ);
+    // printf("New pQ: \n");
+    // finch_exec("println(%s)", new_priorityQ);
 
     new_data->dist = new_dist;
     new_data->priorityQ = new_priorityQ;
@@ -201,10 +201,7 @@ int SSSP(struct sssp_data* final_data) {
 }
 
 int main(int argc, char** argv) {
-    printf("%s\n", "BEfore initialize");
-
     finch_initialize();
-    printf("%s\n", "After initialize");
 
     jl_value_t* res = finch_eval("using RewriteTools\n\
     using Finch.IndexNotation\n");

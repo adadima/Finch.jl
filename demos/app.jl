@@ -44,7 +44,6 @@ end
 
 # new_priorityQ[j][k] = (dist[k] > new_dist[k]) * (j <= new_dist[k] &&  new_dist[k] < j + 1) + (dist[k] == new_dist[k] && j != priority) * priorityQ[j][k]
 function new_pq_func(new_priorityQ, old_priorityQ, dist, new_dist, priority) 
-    # @index @loop j k new_priorityQ[j, k] = old_priorityQ[j, k] + ((dist[k] > new_dist[k]) * (new_dist[k] == j-1) - (dist[k] > new_dist[k]) * (dist[k] == j-1))
     @index @loop j k new_priorityQ[j, k] = (dist[k] > new_dist[k]) * (new_dist[k] == j-1) + (dist[k] == new_dist[k] && j != $priority) * old_priorityQ[j, k]
 end
 

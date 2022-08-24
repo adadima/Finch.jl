@@ -153,34 +153,51 @@ end
 
 unfurl(fbr::VirtualFiber{VirtualSparseListLevel}, ctx, mode::Read, idx, idxs...) =
     unfurl(fbr, ctx, mode, protocol(idx, walk), idxs...)
+    
+function refurl(fbr::VirtualFiber{VirtualSparseListLevel}, ctx, ::Read, tail...)
+    lvl = fbr.lvl
+    tag=lvl.ex
+    env = deepcopy(fbr.env)
+    #TODO insert cache
+    env.my_q_start = my_q_start = ctx.freshen(tag, :_q_start)
+    env.my_q_stop = my_q_stop = ctx.freshen(tag, :_q_stop)
+    env.my_i_start = my_i_start = ctx.freshen(tag, :_i_start)
+    env.my_i_stop = my_i_stop = ctx.freshen(tag, :_i_stop)
+
+    Thunk(
+        preamble = quote
+            $my_q_start = $(lvl.ex).pos[$(ctx(envposition(fbr.env)))]
+            $my_q_stop = $(lvl.ex).pos[$(ctx(envposition(fbr.env))) + 1]
+            if $my_q_start < $my_q_stop
+                $my_i_start = $(lvl.ex).idx[$my_q_start]
+                $my_i_stop = $(lvl.ex).idx[$my_q_stop - 1]
+            else
+                $my_i_start = 1
+                $my_i_stop = 0
+            end
+        end,
+        body = access(VirtualFiber(lvl, env), Read(), tail...)
+    )
+end
 
 function unfurl(fbr::VirtualFiber{VirtualSparseListLevel}, ctx, mode::Read, idx::Protocol{<:Any, Walk}, idxs...)
     lvl = fbr.lvl
     tag = lvl.ex
     my_i = ctx.freshen(tag, :_i)
     my_q = ctx.freshen(tag, :_q)
-    my_q_stop = ctx.freshen(tag, :_q_stop)
-    my_i1 = ctx.freshen(tag, :_i1)
 
     body = Thunk(
         preamble = quote
-            $my_q = $(lvl.ex).pos[$(ctx(envposition(fbr.env)))]
-            $my_q_stop = $(lvl.ex).pos[$(ctx(envposition(fbr.env))) + 1]
-            if $my_q < $my_q_stop
-                $my_i = $(lvl.ex).idx[$my_q]
-                $my_i1 = $(lvl.ex).idx[$my_q_stop - 1]
-            else
-                $my_i = 1
-                $my_i1 = 0
-            end
+            $my_q = $(fbr.env.my_q_start)
+            $my_i = $(fbr.env.my_i_start)
         end,
         body = Pipeline([
             Phase(
-                stride = (ctx, idx, ext) -> my_i1,
+                stride = (ctx, idx, ext) -> fbr.env.my_i_stop,
                 body = (start, step) -> Stepper(
                     seek = (ctx, ext) -> quote
                         #$my_q = searchsortedfirst($(lvl.ex).idx, $start, $my_q, $my_q_stop, Base.Forward)
-                        while $my_q < $my_q_stop && $(lvl.ex).idx[$my_q] < $(ctx(getstart(ext)))
+                        while $my_q < $(fbr.env.my_q_stop) && $(lvl.ex).idx[$my_q] < $(ctx(getstart(ext)))
                             $my_q += 1
                         end
                     end,
@@ -215,30 +232,21 @@ function unfurl(fbr::VirtualFiber{VirtualSparseListLevel}, ctx, mode::Read, idx:
     tag = lvl.ex
     my_i = ctx.freshen(tag, :_i)
     my_q = ctx.freshen(tag, :_q)
-    my_q_stop = ctx.freshen(tag, :_q_stop)
-    my_i1 = ctx.freshen(tag, :_i1)
 
     body = Thunk(
         preamble = quote
-            $my_q = $(lvl.ex).pos[$(ctx(envposition(fbr.env)))]
-            $my_q_stop = $(lvl.ex).pos[$(ctx(envposition(fbr.env))) + 1]
-            if $my_q < $my_q_stop
-                $my_i = $(lvl.ex).idx[$my_q]
-                $my_i1 = $(lvl.ex).idx[$my_q_stop - 1]
-            else
-                $my_i = 1
-                $my_i1 = 0
-            end
+            $my_q = $(fbr.env.my_q_start)
+            $my_i = $(fbr.env.my_i_start)
         end,
         body = Pipeline([
             Phase(
-                stride = (ctx, idx, ext) -> my_i1,
+                stride = (ctx, idx, ext) -> fbr.env.my_i_stop,
                 body = (start, step) -> Jumper(
                     body = Thunk(
                         body = Jump(
                             seek = (ctx, ext) -> quote
                                 #$my_q = searchsortedfirst($(lvl.ex).idx, $start, $my_q, $my_q_stop, Base.Forward)
-                                while $my_q < $my_q_stop && $(lvl.ex).idx[$my_q] < $(ctx(getstart(ext)))
+                                while $my_q < $(fbr.env.my_q_stop) && $(lvl.ex).idx[$my_q] < $(ctx(getstart(ext)))
                                     $my_q += 1
                                 end
                                 $my_i = $(lvl.ex).idx[$my_q]
@@ -257,7 +265,7 @@ function unfurl(fbr::VirtualFiber{VirtualSparseListLevel}, ctx, mode::Read, idx:
                                 true => Stepper(
                                     seek = (ctx, ext) -> quote
                                         #$my_q = searchsortedfirst($(lvl.ex).idx, $start, $my_q, $my_q_stop, Base.Forward)
-                                        while $my_q < $my_q_stop && $(lvl.ex).idx[$my_q] < $(ctx(getstart(ext)))
+                                        while $my_q < $(fbr.env.my_q_stop) && $(lvl.ex).idx[$my_q] < $(ctx(getstart(ext)))
                                             $my_q += 1
                                         end
                                     end,
@@ -297,10 +305,7 @@ unfurl(fbr::VirtualFiber{VirtualSparseListLevel}, ctx, mode::Union{Write, Update
 function unfurl(fbr::VirtualFiber{VirtualSparseListLevel}, ctx, mode::Union{Write, Update}, idx::Protocol{<:Any, Extrude}, idxs...)
     lvl = fbr.lvl
     tag = lvl.ex
-    my_i = ctx.freshen(tag, :_i)
     my_q = ctx.freshen(tag, :_q)
-    my_q_stop = ctx.freshen(tag, :_q_stop)
-    my_i1 = ctx.freshen(tag, :_i1)
     my_guard = if hasdefaultcheck(lvl.lvl)
         ctx.freshen(tag, :_isdefault)
     end

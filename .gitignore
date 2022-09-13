@@ -10,3 +10,6 @@ demos/embed_demo.o
 .idea/
 demos/sssp
 demos/sssp.o
+demos/cc.o
+demos/cc
+demos/bfs

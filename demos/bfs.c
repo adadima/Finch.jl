@@ -60,6 +60,33 @@ end");
     // finch_exec("println(%s)\n", V_out);
 }
 
+void F_P_update(struct bfs_data* in_data, struct bfs_data* out_data, jl_value_t* V_out)  {
+    jl_function_t* P_F_func = finch_eval("function P_F(F_out, P_out, P_in, edges, F_in, V_out, N)\n\ 
+    B = Finch.Fiber(\n\
+        Solid(N,\n\
+            Element{0, Cint}([])\n\
+        )\n\
+    )\n\
+    @index @loop j k begin\n\
+        F_out[j] <<$or>>= edges[j, k] * F_in[k] * V_out[j]\n\
+        B[j] <<$choose>>= edges[j, k] * F_in[k] * V_out[j] * k\n\
+      end\n\
+    @index @loop j P_out[j] = $choose(B[j], P_in[j])\n\
+end");
+
+    jl_value_t* F_out = finch_Fiber(
+        finch_Solid(finch_Cint(N),
+        finch_ElementLevel(finch_Cint(0), finch_eval("Cint[]")))
+    );
+
+    jl_value_t* P_out = finch_Fiber(
+        finch_Solid(finch_Cint(N),
+        finch_ElementLevel(finch_Cint(0), finch_eval("Cint[]")))
+    );
+
+    finch_call(P_F_func, F_out, P_out, in_data->P, edges, in_data->F, V_out, finch_Cint(N));
+}
+
 void F_update(struct bfs_data* in_data, struct bfs_data* out_data, jl_value_t* V_out) {
     jl_function_t* F_func = finch_eval("function F_out_func(F_out, edges, F_in, V_out)\n\
     @index @loop j k F_out[j] <<$or>>= edges[j, k] * F_in[k] * V_out[j]\n\
@@ -116,9 +143,10 @@ void BFS_Step(struct bfs_data* in_data, struct bfs_data* out_data) {
     // printf("Before V_update\n");
     V_update(in_data, V_out);
     // printf("Before F_update\n");
-    F_update(in_data, out_data, V_out);
-    // printf("Before P_update\n");
-    P_update(in_data, out_data, V_out);
+    F_P_update(in_data, out_data, V_out);
+    // F_update(in_data, out_data, V_out);
+    // // printf("Before P_update\n");
+    // P_update(in_data, out_data, V_out);
 }
 
 int outer_loop_condition(jl_value_t* F) {

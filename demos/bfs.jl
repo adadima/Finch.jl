@@ -27,6 +27,7 @@ end
         end
     end),
 
+    # 
     (@rule @i(@chunk $i a (b[j...] <<$or>>= $d)) => if Finch.isliteral(d) && i ∉ j
         @i (b[j...] <<$or>>= $d)
     end),
@@ -52,12 +53,12 @@ function V_func(V_out, P_in)
     @index @loop j V_out[j] = (P_in[j] == (0 - 1))
 end
 
-# initial value for or is 0; tensor is by default initialized to 0
+# F_out[j] = edges[j][k] * F_in[k] * V_out[j] | k: (OR, 0)
 function F_out_func(F_out, edges, F_in, V_out)
     @index @loop j k F_out[j] <<$or>>= edges[j, k] * F_in[k] * V_out[j]
 end
 
-# initial value for choose is P_in[j]
+# P_out[j] = edges[j][k] * F_in[k] * V_out[j] * (k + 1) | k:(CHOOSE, P_in[j])
 function P_out_func(P_out, edges, F_in, V_out, P_in, N)
     B = Finch.Fiber(
         Solid(N,
@@ -65,8 +66,21 @@ function P_out_func(P_out, edges, F_in, V_out, P_in, N)
         )
     )
     @index @loop j k B[j] <<$choose>>= edges[j, k] * F_in[k] * V_out[j] * k
-    println("B: ")
-    println(B.lvl.lvl.val)
+    @index @loop j P_out[j] = $choose(B[j], P_in[j])
+end
+
+# F_out[j] = edges[j][k] * F_in[k] * V_out[j] | k: (OR, 0)
+# P_out[j] = edges[j][k] * F_in[k] * V_out[j] * (k + 1) | k:(CHOOSE, P_in[j])
+function P_F(F_out, P_out, P_in, edges, F_in, V_out, N) 
+    B = Finch.Fiber(
+        Solid(N,
+            Element{0, Cint}([])
+        )
+    )
+    @index @loop j k begin
+        F_out[j] <<$or>>= edges[j, k] * F_in[k] * V_out[j]
+        B[j] <<$choose>>= edges[j, k] * F_in[k] * V_out[j] * k
+      end
     @index @loop j P_out[j] = $choose(B[j], P_in[j])
 end
 
@@ -113,15 +127,21 @@ function main()
         Solid(N,
         Element{0, Cint}([]))
     );
-    F_out_func(F_out, edges, F, V_out);
-    println("F_out:")
-    println(F_out.lvl.lvl.val)
+    # F_out_func(F_out, edges, F, V_out);
+    # println("F_out:")
+    # println(F_out.lvl.lvl.val)
 
     P_out = Finch.Fiber(
         Solid(N,
         Element{0, Cint}([]))
     );
-    P_out_func(P_out, edges, F, V_out, P, N)
+    # P_out_func(P_out, edges, F, V_out, P, N)
+    # println("P_out:")
+    # println(P_out.lvl.lvl.val)
+    P_F(F_out, P_out, P, edges, F, V_out, N)
+    println("F_out:")
+    println(F_out.lvl.lvl.val)
+
     println("P_out:")
     println(P_out.lvl.lvl.val)
 end

@@ -87,11 +87,18 @@ end");
         finch_ElementLevel(finch_Float64(0), finch_eval("Float64[]")))
     );
     finch_call(rank_func, rank, edges, in_data->r, out_degree);
-
     printf("Rank: \n");
     finch_exec("println(%s)", rank);
 
     out_data->ranks = rank;
+    
+    
+//     jl_function_t* display = finch_eval("function display_lowered(rank, edges, r_in, out_d)\n\
+//     ex = @index_program_instance (@loop i j rank[i] += edges[i, j] * r_in[j] / out_d[j])\n\
+//     display(execute_code_lowered(:ex, typeof(ex)))\n\
+//     println()\n\
+// end");
+//     finch_call(display, rank, edges, in_data->r, out_degree);
 }
 
 void R_Update(struct pr_data* out_data) {
@@ -145,7 +152,8 @@ int main(int argc, char** argv) {
     finch_initialize();
 
     jl_value_t* res = finch_eval("using RewriteTools\n\
-    using Finch.IndexNotation\n");
+    using Finch.IndexNotation\n\
+    using Finch: execute_code_lowered");
 
     res = finch_eval("or(x,y) = x == 1|| y == 1\n\
 function choose(x, y)\n\

@@ -85,6 +85,23 @@ end");
     );
 
     finch_call(P_F_func, F_out, P_out, in_data->P, edges, in_data->F, V_out, finch_Cint(N));
+
+//     jl_function_t* display = finch_eval("function display_lowered(F_out, P_out, P_in, edges, F_in, V_out, N)\n\
+//     B = Finch.Fiber(\n\
+//         Solid(N,\n\
+//             Element{0, Cint}([])\n\
+//         )\n\
+//     )\n\
+//     ex1 = @index_program_instance @loop j k begin\n\
+//         F_out[j] <<$or>>= edges[j, k] * F_in[k] * V_out[j]\n\
+//         B[j] <<$choose>>= edges[j, k] * F_in[k] * V_out[j] * k\n\
+//       end\n\
+//     display(execute_code_lowered(:ex1, typeof(ex1)))\n\
+//     ex2 = @index_program_instance @loop j P_out[j] = $choose(B[j], P_in[j])\n\
+//     display(execute_code_lowered(:ex2, typeof(ex2)))\n\
+//     println()\n\
+// end");
+//     finch_call(display, F_out, P_out, in_data->P, edges, in_data->F, V_out, finch_Cint(N));
 }
 
 void F_update(struct bfs_data* in_data, struct bfs_data* out_data, jl_value_t* V_out) {
@@ -181,7 +198,8 @@ int main(int argc, char** argv) {
     finch_initialize();
 
     jl_value_t* res = finch_eval("using RewriteTools\n\
-    using Finch.IndexNotation\n");
+    using Finch.IndexNotation\n\
+    using Finch: execute_code_lowered\n");
 
     res = finch_eval("or(x,y) = x == 1|| y == 1\n\
 function choose(x, y)\n\

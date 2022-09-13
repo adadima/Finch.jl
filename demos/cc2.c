@@ -9,7 +9,7 @@
 // const update: vector[2](int);
 
 
-
+old_ID[j] = a => new_IDs[a] = min(old_IDs[a], ol)
 new_IDs[old_IDs[j]] = min(old_IDs[j], old_IDs[old_IDs[i]]), where there is edge from i to j
 new_IDs[old_IDs[i]] = min(old_IDs[i], old_IDs[old_IDs[j]])
 update[1] = old_IDs[old_IDs[j]] != new_IDs[old_IDs[j]] || old_IDs[old_IDs[i]] != new_IDs[old_IDs[i]]

@@ -13,3 +13,6 @@ demos/sssp.o
 demos/cc.o
 demos/cc
 demos/bfs
+demos/bfs.o
+demos/pr
+demos/pr.o

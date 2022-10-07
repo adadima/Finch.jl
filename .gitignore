@@ -32,3 +32,11 @@ demos/bfs
 demos/bfs.o
 demos/pr
 demos/pr.o
+demos/cc2
+demos/cc2.o
+demos/bc
+demos/bc.o
+*.dSYM/
+.vscode/
+!demos/graphs/
+demos/graphs/soc-Live*

@@ -94,6 +94,7 @@
     (@rule @f($a[i...] *= 1) => pass(a)),
     (@rule @f(@sieve true $a) => a),
     (@rule @f(@sieve false $a) => pass(getresults(a)...)),
+    (@rule @f((0 / $a)) => 0),
 
     (@rule @f(@chunk $i $a ($b[j...] <<min>>= $d)) => if Finch.isliteral(d) && i ∉ j
         @f (b[j...] <<min>>= $d)

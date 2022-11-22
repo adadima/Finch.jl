@@ -144,7 +144,5 @@ macro f(ex)
 end
 
 macro finch_program_instance(ex)
-    return quote
-        $(capture_finch_instance(ex))
-    end
+    return finch_parse_instance(ex)
 end

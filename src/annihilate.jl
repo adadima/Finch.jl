@@ -38,7 +38,6 @@ iscommutative(::typeof(+)) = true
 iscommutative(::typeof(*)) = true
 iscommutative(::typeof(min)) = true
 iscommutative(::typeof(max)) = true
-iscommutative(::typeof(choose)) = false
 
 iscommutative(alg) = (f) -> iscommutative(alg, f)
 iscommutative(alg, f::IndexNode) = f.kind === literal && iscommutative(alg, f.val)

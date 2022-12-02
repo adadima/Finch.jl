@@ -41,3 +41,4 @@ demos/bc.o
 .vscode/
 !demos/graphs/
 demos/graphs/soc-Live*
+embed/Manifest.toml

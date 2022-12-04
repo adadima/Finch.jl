@@ -1,5 +1,10 @@
+<<<<<<< HEAD
 abstract type AbstractAlgebra end
 struct DefaultAlgebra<:AbstractAlgebra end
+=======
+rules = []
+add_rules!(new_rules) = union!(rules, new_rules)
+>>>>>>> c7ddcf0 (fix merge bug)
 
 struct Chooser{D} end
 

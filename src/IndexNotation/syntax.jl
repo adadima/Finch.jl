@@ -51,7 +51,11 @@ or(x, y, tail...) = x || or(y, tail...)
 right(l, m, r...) = right(m, r)
 right(l, r) = r
 
+<<<<<<< HEAD
 struct FinchParserVisitor
+=======
+struct FinchParserContext
+>>>>>>> c7ddcf0 (fix merge bug)
     nodes
     results
 end

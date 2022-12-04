@@ -93,7 +93,7 @@ void compile() {
         \n\
         kernel = @finch_program (@loop j @loop k (begin\n\
             F_out[j] <<or>>= (w[] == 1)\n\
-            B[j] <<choose>>= w[] * k\n\
+            B[j] <<choose(0)>>= w[] * k\n\
         end\n\
             where (w[] = edges[j, k] * F_in[k] * V_out[j]) ) )\n\
         kernel_code = Finch.execute_code_virtualized(kernel, ctx_2)\n\
@@ -113,7 +113,7 @@ void compile() {
         P_out = Finch.virtualize(:P_out, t1, ctx_2)\n\
         B = Finch.virtualize(:B, t1, ctx_2)\n\
         \n\
-        kernel = @finch_program @loop j P_out[j] = choose(B[j], P_in[j])\n\
+        kernel = @finch_program @loop j P_out[j] = choose(0)(B[j], P_in[j])\n\
         kernel_code = Finch.execute_code_virtualized(kernel, ctx_2)\n\
     end\n\
     return quote\n\
@@ -345,7 +345,7 @@ int main(int argc, char** argv) {
     finch_initialize();
 
     jl_value_t* res = finch_eval("using RewriteTools\n\
-    using Finch.IndexNotation: or, choose\n\
+    using Finch: or, choose\n\
     using SparseArrays\n\
      using MatrixMarket\n\
     ");

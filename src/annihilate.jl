@@ -1,10 +1,5 @@
-<<<<<<< HEAD
 abstract type AbstractAlgebra end
 struct DefaultAlgebra<:AbstractAlgebra end
-=======
-rules = []
-add_rules!(new_rules) = union!(rules, new_rules)
->>>>>>> c7ddcf0 (fix merge bug)
 
 struct Chooser{D} end
 
@@ -36,13 +31,6 @@ isassociative(::AbstractAlgebra, ::typeof(*)) = true
 isassociative(::AbstractAlgebra, ::typeof(min)) = true
 isassociative(::AbstractAlgebra, ::typeof(max)) = true
 isassociative(::AbstractAlgebra, ::Chooser) = true
-iscommutative(f) = false
-iscommutative(::typeof(or)) = true
-iscommutative(::typeof(and)) = true
-iscommutative(::typeof(+)) = true
-iscommutative(::typeof(*)) = true
-iscommutative(::typeof(min)) = true
-iscommutative(::typeof(max)) = true
 
 iscommutative(alg) = (f) -> iscommutative(alg, f)
 iscommutative(alg, f::IndexNode) = f.kind === literal && iscommutative(alg, f.val)

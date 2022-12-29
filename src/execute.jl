@@ -90,9 +90,9 @@ function execute_code(ex, T, algebra = DefaultAlgebra())
         unquote_literals
 end
 
-function execute_code_virtualized(ex, T)
+function execute_code_virtualized(ex, T, algebra = DefaultAlgebra())
     prgm = ex
-    code = contain(LowerJulia()) do ctx
+    code = contain(LowerJulia(algebra = algebra)) do ctx
         quote
             $(begin
                 #The following call separates tensor and index names from environment symbols.
@@ -104,7 +104,7 @@ function execute_code_virtualized(ex, T)
                     (prgm, dims) = dimensionalize!(prgm, ctx_2)
                     prgm = Initialize(ctx = ctx_2)(prgm)
                     prgm = ThunkVisitor(ctx_2)(prgm) #TODO this is a bit of a hack.
-                    prgm = simplify(prgm)
+                    prgm = simplify(prgm, ctx_2)
                     ctx_2(prgm)
                 end
             end)

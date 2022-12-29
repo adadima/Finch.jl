@@ -337,15 +337,15 @@ int main(int argc, char** argv) {
 
     damp = 0.85;
 
-    setup1();
+    // setup1();
 
-    setup2();
+    // setup2();
 
-    setup3();
+    // setup3();
 
-    setup4();
+    // setup4();
 
-    // setup5();
+    setup5();
 
     finch_finalize();
 }
